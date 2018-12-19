@@ -36,6 +36,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.Pair;
 
 import com.owncloud.android.MainApp;
