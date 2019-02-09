@@ -58,13 +58,13 @@ public class PassCodeManager {
         return mPassCodeManagerInstance;
     }
 
-    private Long mTimestamp = 0l;
+    private Long mTimestamp = 0L;
     private int mVisibleActivitiesCounter = 0;
 
     protected PassCodeManager() {}
 
     public void onActivityCreated(Activity activity) {
-        if (!BuildConfig.DEBUG) {
+        if (!MainApp.isDeveloper()) {
             if (isPassCodeEnabled()) {
                 activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
             } else {

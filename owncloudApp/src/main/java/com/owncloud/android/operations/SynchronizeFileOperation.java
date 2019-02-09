@@ -223,7 +223,7 @@ public class SynchronizeFileOperation extends SyncOperation {
             }
         }
 
-        if (BuildConfig.DEBUG || MainApp.isBeta()) {
+        if (MainApp.isDeveloper()) {
             Log_OC.i(TAG, "Synchronizing " + mAccount.name + ", file " + mLocalFile.getRemotePath() +
                     ": " + result.getLogMessage());
         }

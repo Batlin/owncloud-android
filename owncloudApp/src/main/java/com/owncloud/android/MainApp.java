@@ -1,5 +1,5 @@
-/**
- *   ownCloud Android client application
+/*
+ * ownCloud Android client application
  *
  *   @author masensio
  *   @author David A. Velasco
@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 
 import com.owncloud.android.authentication.FingerprintManager;
 import com.owncloud.android.authentication.PassCodeManager;
@@ -57,6 +58,8 @@ import com.owncloud.android.ui.activity.WhatsNewActivity;
 public class MainApp extends Application {
 
     private static final String TAG = MainApp.class.getSimpleName();
+    public static final String CLICK_DEV_MENU = "clickDeveloperMenu";
+    public static final int CLICKS_NEEDED_TO_BE_DEVELOPER = 5;
 
     private static final String AUTH_ON = "on";
 
@@ -67,15 +70,13 @@ public class MainApp extends Application {
 
     private static Context mContext;
 
-    // TODO Enable when "On Device" is recovered?
-    // TODO better place
-    // private static boolean mOnlyOnDevice = false;
+    private static boolean mDeveloper;
 
-    public static String BETA_VERSION = "beta";
-
-    public void onCreate(){
+    public void onCreate() {
         super.onCreate();
         MainApp.mContext = getApplicationContext();
+
+        readIsDeveloper();
 
         OwnCloudClient.setContext(mContext);
 
@@ -113,7 +114,7 @@ public class MainApp extends Application {
         // initialise thumbnails cache on background thread
         new ThumbnailsCacheManager.InitDiskCacheTask().execute();
 
-        if (BuildConfig.DEBUG || isBeta()) {
+        if (isDeveloper()) {
 
             String dataFolder = getDataFolder();
 
@@ -129,7 +130,7 @@ public class MainApp extends Application {
 
             @Override
             public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-                Log_OC.d(activity.getClass().getSimpleName(),  "onCreate(Bundle) starting" );
+                Log_OC.d(activity.getClass().getSimpleName(), "onCreate(Bundle) starting");
                 PassCodeManager.getPassCodeManager().onActivityCreated(activity);
                 PatternManager.getPatternManager().onActivityCreated(activity);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -146,7 +147,7 @@ public class MainApp extends Application {
 
             @Override
             public void onActivityStarted(Activity activity) {
-                Log_OC.d(activity.getClass().getSimpleName(),  "onStart() starting" );
+                Log_OC.d(activity.getClass().getSimpleName(), "onStart() starting");
                 PassCodeManager.getPassCodeManager().onActivityStarted(activity);
                 PatternManager.getPatternManager().onActivityStarted(activity);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -156,7 +157,7 @@ public class MainApp extends Application {
 
             @Override
             public void onActivityResumed(Activity activity) {
-                Log_OC.d(activity.getClass().getSimpleName(), "onResume() starting" );
+                Log_OC.d(activity.getClass().getSimpleName(), "onResume() starting");
             }
 
             @Override
@@ -166,7 +167,7 @@ public class MainApp extends Application {
 
             @Override
             public void onActivityStopped(Activity activity) {
-                Log_OC.d(activity.getClass().getSimpleName(), "onStop() ending" );
+                Log_OC.d(activity.getClass().getSimpleName(), "onStop() ending");
                 PassCodeManager.getPassCodeManager().onActivityStopped(activity);
                 PatternManager.getPatternManager().onActivityStopped(activity);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -181,12 +182,12 @@ public class MainApp extends Application {
 
             @Override
             public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-                Log_OC.d(activity.getClass().getSimpleName(), "onSaveInstanceState(Bundle) starting" );
+                Log_OC.d(activity.getClass().getSimpleName(), "onSaveInstanceState(Bundle) starting");
             }
 
             @Override
             public void onActivityDestroyed(Activity activity) {
-                Log_OC.d(activity.getClass().getSimpleName(), "onDestroy() ending" );
+                Log_OC.d(activity.getClass().getSimpleName(), "onDestroy() ending");
             }
         });
     }
@@ -203,7 +204,7 @@ public class MainApp extends Application {
     public static String getAccountType() {
         return getAppContext().getResources().getString(R.string.account_type);
     }
-    
+
     public static int getVersionCode() {
         try {
             String thisPackageName = getAppContext().getPackageName();
@@ -221,30 +222,9 @@ public class MainApp extends Application {
         return getAppContext().getResources().getString(R.string.authority);
     }
 
-    public static String getDBFile() {
-        return getAppContext().getResources().getString(R.string.db_file);
-    }
-
-    public static String getDBName() {
-        return getAppContext().getResources().getString(R.string.db_name);
-    }
-
     public static String getDataFolder() {
         return getAppContext().getResources().getString(R.string.data_folder);
     }
-
-    public static String getLogName() {
-        return getAppContext().getResources().getString(R.string.log_name);
-    }
-
-    // TODO Enable when "On Device" is recovered ?
-//    public static void showOnlyFilesOnDevice(boolean state){
-//        mOnlyOnDevice = state;
-//    }
-//
-//    public static boolean getOnlyOnDevice(){
-//        return mOnlyOnDevice;
-//    }
 
     // user agent
     public static String getUserAgent() {
@@ -266,18 +246,13 @@ public class MainApp extends Application {
         return String.format(appString, version);
     }
 
-    public static boolean isBeta() {
-        boolean isBeta = false;
-        try {
-            String packageName = getAppContext().getPackageName();
-            PackageInfo packageInfo = getAppContext().getPackageManager().getPackageInfo(packageName, 0);
-            String versionName = packageInfo.versionName;
-            if (versionName.contains(BETA_VERSION)){
-                isBeta = true;
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        return isBeta;
+    public static boolean isDeveloper() {
+        return mDeveloper;
     }
+
+    public void readIsDeveloper() {
+        mDeveloper = BuildConfig.DEBUG || PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
+                .getInt(CLICK_DEV_MENU, 0) > CLICKS_NEEDED_TO_BE_DEVELOPER;
+    }
+
 }

@@ -1,4 +1,4 @@
-/**
+/*
  *   ownCloud Android client application
  *
  *   @author Christian Schabesberger
@@ -23,7 +23,6 @@ package com.owncloud.android.ui.adapter;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -33,7 +32,7 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 
 import com.jakewharton.disklrucache.DiskLruCache;
-import com.owncloud.android.BuildConfig;
+import com.owncloud.android.MainApp;
 import com.owncloud.android.lib.common.utils.Log_OC;
 
 public class DiskLruImageCache {
@@ -85,17 +84,17 @@ public class DiskLruImageCache {
             if( writeBitmapToFile( data, editor ) ) {               
                 mDiskCache.flush();
                 editor.commit();
-                if ( BuildConfig.DEBUG ) {
+                if (MainApp.isDeveloper()) {
                    Log_OC.d( "cache_test_DISK_", "image put on disk cache " + validKey );
                 }
             } else {
                 editor.abort();
-                if ( BuildConfig.DEBUG ) {
+                if (MainApp.isDeveloper()) {
                     Log_OC.d( "cache_test_DISK_", "ERROR on: image put on disk cache " + validKey );
                 }
             }   
         } catch (IOException e) {
-            if ( BuildConfig.DEBUG ) {
+            if (MainApp.isDeveloper()) {
                 Log_OC.d( "cache_test_DISK_", "ERROR on: image put on disk cache " + validKey );
             }
             try {
@@ -133,7 +132,7 @@ public class DiskLruImageCache {
             }
         }
 
-        if ( BuildConfig.DEBUG ) {
+        if (MainApp.isDeveloper()) {
             Log_OC.d("cache_test_DISK_", bitmap == null ? 
                     "not found" : "image read from disk " + validKey);
         }
@@ -142,41 +141,6 @@ public class DiskLruImageCache {
 
     }
 
-    public boolean containsKey( String key ) {
-
-        boolean contained = false;
-        DiskLruCache.Snapshot snapshot = null;
-        String validKey = convertToValidKey(key);
-        try {
-            snapshot = mDiskCache.get( validKey );
-            contained = snapshot != null;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if ( snapshot != null ) {
-                snapshot.close();
-            }
-        }
-
-        return contained;
-
-    }
-
-    public void clearCache() {
-        if ( BuildConfig.DEBUG ) {
-            Log_OC.d( "cache_test_DISK_", "disk cache CLEARED");
-        }
-        try {
-            mDiskCache.delete();
-        } catch ( IOException e ) {
-            e.printStackTrace();
-        }
-    }
-
-    public File getCacheFolder() {
-        return mDiskCache.getDirectory();
-    }
-    
     private String convertToValidKey(String key) {
         return Integer.toString(key.hashCode());
     }
