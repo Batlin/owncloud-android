@@ -163,7 +163,7 @@ public class OCFileListFragment extends ExtendedListFragment implements
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        Log_OC.e(TAG, "onAttach");
+        Log_OC.v(TAG, "onAttach");
         try {
             mContainerActivity = (FileFragment.ContainerActivity) context;
 
@@ -209,7 +209,7 @@ public class OCFileListFragment extends ExtendedListFragment implements
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Log_OC.e(TAG, "onActivityCreated() start");
+        Log_OC.d(TAG, "onActivityCreated() start");
 
         if (savedInstanceState != null) {
             mFile = savedInstanceState.getParcelable(KEY_FILE);
@@ -284,7 +284,7 @@ public class OCFileListFragment extends ExtendedListFragment implements
         getFabUpload().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log_OC.e(TAG,"Clicked" + getContext().toString());
+                Log_OC.i(TAG,"Clicked" + getContext().toString());
                 final View uploadBottomSheet = getLayoutInflater().inflate(R.layout.upload_bottom_sheet_fragment,null);
                 final BottomSheetDialog dialog = new BottomSheetDialog(getContext());
                 dialog.setContentView(uploadBottomSheet);
