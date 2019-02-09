@@ -190,6 +190,9 @@ public class LogHistoryActivity extends ToolbarActivity {
 
     private void setFilter2LogAdapter(String filter) {
         mLogListAdapter.setFilter(filter);
+        if (mLogListAdapter.getItemCount() > 0) {
+            mLogsRecycler.scrollToPosition(mLogListAdapter.getItemCount() - 1);
+        }
     }
 
     @Override
@@ -272,6 +275,7 @@ public class LogHistoryActivity extends ToolbarActivity {
             if (result != null) {
                 mLogListAdapter = new LogListAdapter(result, mCurrentFilter);
                 mLogsRecycler.setAdapter(mLogListAdapter);
+                mLogsRecycler.scrollToPosition(result.size() - 1);
                 dismissLoadingDialog();
             }
         }
