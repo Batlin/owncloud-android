@@ -43,6 +43,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
@@ -107,7 +108,7 @@ public class LogHistoryActivity extends ToolbarActivity {
                 showLoadingDialog();
 
                 // Start a new thread that will load all the log data
-                LoadingLogTask task = new LoadingLogTask();
+                LoadingLogfileTask task = new LoadingLogfileTask();
                 task.execute();
             }
         }
@@ -199,6 +200,10 @@ public class LogHistoryActivity extends ToolbarActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         boolean retval = true;
         switch (item.getItemId()) {
+            case R.id.menu_logcat:
+                LoadingLogcatTask task = new LoadingLogcatTask();
+                task.execute();
+                break;
             case android.R.id.home:
                 finish();
                 break;
@@ -265,7 +270,70 @@ public class LogHistoryActivity extends ToolbarActivity {
     /**
      * Class for loading the log data async
      */
-    private class LoadingLogTask extends AsyncTask<String, Void, ArrayList<String>> {
+    private class LoadingLogcatTask extends AsyncTask<String, Void, ArrayList<String>> {
+
+        protected ArrayList<String> doInBackground(String... args) {
+            return readLogFile();
+        }
+
+        protected void onPostExecute(ArrayList<String> result) {
+            if (result != null) {
+                mLogListAdapter = new LogListAdapter(result, mCurrentFilter, LogHistoryActivity.this);
+                mLogsRecycler.setAdapter(mLogListAdapter);
+                mLogsRecycler.scrollToPosition(result.size() - 1);
+                dismissLoadingDialog();
+            }
+        }
+
+        /**
+         * Read and show log file info
+         */
+        private ArrayList<String> readLogFile() {
+            ArrayList<String> logList = new ArrayList<>();
+            try {
+                Process process = Runtime.getRuntime().exec("logcat -dv time");
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    line = line.replace(" W/", " W: ")
+                            .replace(" E/", " E: ")
+                            .replace(" V/", " V: ")
+                            .replace(" I/", " I: ")
+                            .replace(" D/", " D: ");
+                    logList.add(line);
+                }
+            } catch (IOException e) {
+                Log_OC.e("LoadingLogcatTask", e.getMessage());
+            }
+
+            return logList;
+        }
+    }
+
+    /**
+     * Show loading dialog
+     */
+    public void showLoadingDialog() {
+        // Construct dialog
+        LoadingDialog loading = LoadingDialog.newInstance(R.string.log_progress_dialog_text, false);
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        loading.show(ft, DIALOG_WAIT_TAG);
+    }
+
+    /**
+     * Dismiss loading dialog
+     */
+    public void dismissLoadingDialog() {
+        Fragment frag = getSupportFragmentManager().findFragmentByTag(DIALOG_WAIT_TAG);
+        if (frag != null) {
+            LoadingDialog loading = (LoadingDialog) frag;
+            loading.dismiss();
+        }
+    }
+
+    private class LoadingLogfileTask extends AsyncTask<String, Void, ArrayList<String>> {
 
         protected ArrayList<String> doInBackground(String... args) {
             return readLogFile();
@@ -315,28 +383,6 @@ public class LogHistoryActivity extends ToolbarActivity {
                 }
             }
             return logList;
-        }
-    }
-
-    /**
-     * Show loading dialog
-     */
-    public void showLoadingDialog() {
-        // Construct dialog
-        LoadingDialog loading = LoadingDialog.newInstance(R.string.log_progress_dialog_text, false);
-        FragmentManager fm = getSupportFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        loading.show(ft, DIALOG_WAIT_TAG);
-    }
-
-    /**
-     * Dismiss loading dialog
-     */
-    public void dismissLoadingDialog() {
-        Fragment frag = getSupportFragmentManager().findFragmentByTag(DIALOG_WAIT_TAG);
-        if (frag != null) {
-            LoadingDialog loading = (LoadingDialog) frag;
-            loading.dismiss();
         }
     }
 }
