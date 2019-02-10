@@ -196,7 +196,7 @@ public class FileDownloader extends Service
              * - Retry downloads in background, e.g. when recovering wifi connection
              */
             Log_OC.d(TAG, "Starting FileDownloader service in foreground");
-            startForeground(1, mNotificationBuilder.build());
+            startForeground(140, mNotificationBuilder.build());
         }
 
         if (!intent.hasExtra(KEY_ACCOUNT) ||

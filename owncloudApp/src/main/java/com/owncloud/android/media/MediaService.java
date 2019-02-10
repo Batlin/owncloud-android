@@ -663,7 +663,7 @@ public class MediaService extends Service implements OnCompletionListener, OnPre
         mNotificationBuilder.setContentText(content);
         mNotificationBuilder.setChannelId(MEDIA_SERVICE_NOTIFICATION_CHANNEL_ID);
 
-        startForeground(R.string.media_notif_ticker, mNotificationBuilder.build());
+        startForeground(144, mNotificationBuilder.build());
     }
 
     /**
